@@ -36,6 +36,7 @@
      
 
       document.addEventListener("DOMContentLoaded", function(){
+        //web socket url
               socket = new WebSocket("ws://localhost:4000/ws")
               id = window.location.pathname.split("/").pop();
               id =  parseInt(id, 10);
