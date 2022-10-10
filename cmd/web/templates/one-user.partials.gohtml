@@ -1,0 +1,109 @@
+{{template "base" .}}
+
+    {{define "title" }}
+        {{.Title}}
+    {{end}}
+    
+    
+    {{define "content"}}
+    <table class="table" id="table" style="height:80vh;">
+        <thead>
+          <tr>
+            <th scope="col">Chat</th>
+          </tr>
+        </thead>
+        <tbody>
+        
+         
+        </tbody>
+      </table>
+        
+       <form method="post" id="submit">
+        <div class="form-group">
+          <input type="text" class="form-control" id="message" name="message" aria-describedby="msgHelp" required placeholder="Type ur thought">
+        </div>
+        <a href="javascript:void(0)" class="btn btn-primary" id="btn" onclick="postMsg()" >SEND</a>
+      </form>
+    {{end}}
+
+    {{define "script"}}
+    <script>
+      var socket;
+      
+      const element = document.getElementById('btn')
+      
+      var id;
+     
+
+      document.addEventListener("DOMContentLoaded", function(){
+              socket = new WebSocket("ws://localhost:4000/ws")
+              id = window.location.pathname.split("/").pop();
+              id =  parseInt(id, 10);
+              socket.onopen = () =>{
+                console.log("Connected to web socket");
+                let payload ={
+                  user_id : id,
+                  action:"GET"
+                }
+                socket.send(JSON.stringify(payload));
+                // alert(payload.action);
+                
+               }
+              
+
+              socket.onclose = event => {
+                
+              }
+
+              socket.onerror = error => { };
+
+              socket.onmessage = event => {
+                
+                console.log("EVENT IS "+ JSON.stringify(event));
+                let data = JSON.parse(event.data);
+                console.log("Starting/CHAT IS "+ JSON.stringify(data));
+                getAllMsg(data);
+              }
+                
+     
+          });
+
+          
+
+        function getAllMsg(data){
+          let table = document.getElementById("table").getElementsByTagName("tbody")[0];
+          console.log(data.action);
+          if(data.action == "GET"){
+            table.innerHTML = "";
+          }   console.log(data.chat);
+              if(data.chat){
+                data.chat.forEach(function(i){
+                  if(i.s_id == id || i.r_id ==id){
+                    let newRow = table.insertRow();
+                    let newCell = newRow.insertCell();
+                    if(i.s_id == data.user_id){
+                      newCell.innerHTML = `<p style="float:right; color:rgb(0, 91, 0);font-size:1.3rem;">${i.msg}</p>`;
+                    } else{
+                      newCell.innerHTML = `<p style=" color:rgb(0, 0, 255); font-size:1.3rem;">${i.msg}</p>`;
+                    }
+                  }
+                });
+              }
+
+          }
+        
+
+
+        function postMsg(){
+          let payload = {
+              msg: document.getElementById("message").value,
+              action: "POST",
+              user_id: id
+          }
+          document.getElementById("message").value = "";
+          socket.send(JSON.stringify(payload));
+        }
+
+        
+      </script>
+    {{end}}

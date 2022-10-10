@@ -1,0 +1,101 @@
+{{template "base" .}}
+
+{{define "Title"}}
+    ALL USERS
+{{end}}
+
+{{define "content"}}
+<div class="mt-4 p-5 bg-primary text-white rounded">
+    <h1>ALL USERS</h1>
+    
+  </div>
+<table class="table" id="table">
+    <thead>
+      <tr>
+        <th scope="col">NAME</th>
+        <th scope="col">USERID</th>
+      </tr>
+    </thead>
+    <tbody>
+    
+     
+    </tbody>
+</table>
+
+<form method="post" id="submit" class="col-4" >
+    <br><br><br>
+    <div class="form-group">
+        <input type="text" class="form-control" id="name" name="name" required aria-describedby="msgHelp" placeholder="NAME">
+    </div> <br>
+    <div class="form-group">
+        <input type="text" class="form-control" id="uname" name="uname" required aria-describedby="msgHelp" placeholder="USERNAME">
+    </div> <br>
+    <a href="javascript:void(0)" class="btn btn-primary" onclick="register()">Create</a>
+  </form>
+
+{{end}}
+
+
+{{define "script"}}
+<script>
+
+    //====================WEB SOCKET========================
+    
+    let tbody = document.getElementById("table").getElementsByTagName("tbody")[0];
+    tbody.innerHTML="";
+    const body={
+        msg:"none",
+    }
+
+    const requestOptions = {
+        method:"GET",
+        headers : {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        
+    }
+
+    fetch("{{.API}}/api/all-users", requestOptions)
+    .then(response => response.json())
+    .then(function(data){
+        // console.log(data);
+        if(data){
+            data.forEach(function(i){
+                let newRow = tbody.insertRow();
+                let newCell = newRow.insertCell();
+                newCell.innerHTML = `<a href="/user/${i.id}" target="_blank" >${i.name}</a>`;
+                newCell = newRow.insertCell();
+                newCell.innerHTML = i.u_name;
+
+            })
+        }
+    });
+
+    function register(){
+        let name = document.getElementById("name").value;
+        let uname = document.getElementById("uname").value;
+
+        const payload = {
+            name: name,
+            u_name: uname
+        }   
+        
+
+        const requestOptions = {
+            method:"POST",
+            headers : {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        }
+
+        fetch("{{.API}}/api/add-user", requestOptions)
+        .then(response => response.json)
+        .then(function(data){
+            location.reload();
+        });
+    }
+</script>
+{{end}}
