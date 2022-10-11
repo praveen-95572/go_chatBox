@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -84,13 +85,15 @@ func (m *DBModel) GetAllUser() ([]*Users, error) {
 }
 
 // GET ALL MSG of USER
-func (m *DBModel) GetAllMsg(id int) ([]*Chat, error) {
+func (m *DBModel) GetAllMsg(id, uid int) ([]*Chat, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	var chats []*Chat
 
-	rows, err := m.DB.QueryContext(ctx, `SELECT * FROM chat WHERE s_id = ? || r_id = ?`, id, id)
+	rows, err := m.DB.QueryContext(ctx, `SELECT * FROM chat WHERE (s_id = ? AND r_id = ?)   OR (s_id = ? AND r_id = ?)
+	order by id;
+	`, id, uid, uid, id)
 	if err != nil {
 		return nil, err
 	}
@@ -112,18 +115,13 @@ func (m *DBModel) GetAllMsg(id int) ([]*Chat, error) {
 	return chats, nil
 }
 
-func (m *DBModel) PostMsg(id int, msg string) (int, error) {
+func (m *DBModel) PostMsg(id, chat_id int, msg string) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	var ex_id int
-	if id == 1 {
-		ex_id = 2
-	} else {
-		ex_id = 1
-	}
+
 	stmt := `INSERT INTO chat (s_id, r_id, msg) VALUES (?, ?, ?)`
 
-	res, err := m.DB.ExecContext(ctx, stmt, id, ex_id, msg)
+	res, err := m.DB.ExecContext(ctx, stmt, id, chat_id, msg)
 	if err != nil {
 		return 0, err
 	}
@@ -181,4 +179,35 @@ func (m *DBModel) AddNewUser(name, uname string) (int, error) {
 	}
 
 	return int(idx), nil
+}
+
+func (m *DBModel) GetAllFriend(id int) ([]*Users, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `select DISTINCT users.* from users INNER JOIN (SELECT * from chat where s_id = ? OR r_id = ?) AS tags ON tags.s_id = users.id OR tags.r_id = users.id`
+
+	var users []*Users
+
+	rows, err := m.DB.QueryContext(ctx, stmt, id, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var u Users
+		err := rows.Scan(
+			&u.ID,
+			&u.Name,
+			&u.Username,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &u)
+	}
+	fmt.Println("USERS IS ", users)
+	return users, nil
+
 }

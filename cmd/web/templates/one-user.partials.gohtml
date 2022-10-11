@@ -6,6 +6,7 @@
     
     
     {{define "content"}}
+    <button class="btn btn-primary" ><a href="/" id="btn" style="color:white;">Back</a></button>
     <table class="table" id="table" style="height:80vh;">
         <thead>
           <tr>
@@ -22,6 +23,9 @@
         <div class="form-group">
           <input type="text" class="form-control" id="message" name="message" aria-describedby="msgHelp" required placeholder="Type ur thought">
         </div>
+        <div class="form-group">
+          <input type="text" class="form-control" id="message" name="message" aria-describedby="msgHelp" required placeholder="Type ur thought">
+        </div>
         <a href="javascript:void(0)" class="btn btn-primary" id="btn" onclick="postMsg()" >SEND</a>
       </form>
     {{end}}
@@ -32,18 +36,25 @@
       
       const element = document.getElementById('btn')
       
-      var id;
+      var id, uid;
      
 
       document.addEventListener("DOMContentLoaded", function(){
         //web socket url
               socket = new WebSocket("ws://localhost:4000/ws")
-              id = window.location.pathname.split("/").pop();
+              var url_array = window.location.pathname.split('/') // Split the string into an array with / as separator 
+              id = url_array[url_array.length-1];
               id =  parseInt(id, 10);
+              uid = url_array[url_array.length-2];
+              uid =  parseInt(uid, 10);
+             
+              document.getElementById("btn").href = `/user/${uid}`;
+              
               socket.onopen = () =>{
                 console.log("Connected to web socket");
                 let payload ={
-                  user_id : id,
+                  u_id: id,
+                  user_id : uid,
                   action:"GET"
                 }
                 socket.send(JSON.stringify(payload));
@@ -82,7 +93,7 @@
                   if(i.s_id == id || i.r_id ==id){
                     let newRow = table.insertRow();
                     let newCell = newRow.insertCell();
-                    if(i.s_id == data.user_id){
+                    if(i.s_id == uid){
                       newCell.innerHTML = `<p style="float:right; color:rgb(0, 91, 0);font-size:1.3rem;">${i.msg}</p>`;
                     } else{
                       newCell.innerHTML = `<p style=" color:rgb(0, 0, 255); font-size:1.3rem;">${i.msg}</p>`;
@@ -99,7 +110,8 @@
           let payload = {
               msg: document.getElementById("message").value,
               action: "POST",
-              user_id: id
+              u_id: id,
+              user_id : uid,
           }
           document.getElementById("message").value = "";
           socket.send(JSON.stringify(payload));

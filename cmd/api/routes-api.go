@@ -19,9 +19,10 @@ func (app *application) routes() http.Handler {
 	}))
 
 	mux.Get("/api/all-users", app.AllUsers)
-	mux.Get("/api/getAllMsg/{id}", app.GetAllMsg)
+	mux.Get("/api/getAllMsg/{id}/{uid}", app.GetAllMsg)
 	mux.Post("/api/msg/{id}", app.PostMsg)
 	mux.Post("/api/add-user", app.AddUser)
+	mux.Get("/api/all-friend/{id}", app.GetFriend)
 	// mux.Route("/api", func(r chi.Router) {
 	// 	mux.Post("/all-users", app.AllUsers)
 	// })

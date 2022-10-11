@@ -27,15 +27,22 @@ func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) personA(w http.ResponseWriter, r *http.Request) {
-	td := &TemplateData{
-		Data:  app.Messages,
-		Title: "PersonA",
-	}
-	if err := app.renderTemplate(w, r, "personA", td); err != nil {
+func (app *application) AllFriend(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Body)
+	if err := app.renderTemplate(w, r, "all-friend", &TemplateData{API: app.config.api}); err != nil {
 		app.errorLog.Println(err)
 	}
 }
+
+// func (app *application) personA(w http.ResponseWriter, r *http.Request) {
+// 	td := &TemplateData{
+// 		Data:  app.Messages,
+// 		Title: "PersonA",
+// 	}
+// 	if err := app.renderTemplate(w, r, "personA", td); err != nil {
+// 		app.errorLog.Println(err)
+// 	}
+// }
 
 func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, title string, data *TemplateData) error {
 	var t *template.Template

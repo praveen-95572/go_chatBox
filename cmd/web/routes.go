@@ -10,8 +10,7 @@ func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
 	mux.Get("/", app.Home)
 	mux.Get("/ws", app.WsEndPoint)
-	mux.Get("/person/A", app.personA)
-	mux.Get("/user/{id}", app.OneUser)
-
+	mux.Get("/user/{id}", app.AllFriend)
+	mux.Get("/chat/{uid}/{id}", app.OneUser)
 	return mux
 }

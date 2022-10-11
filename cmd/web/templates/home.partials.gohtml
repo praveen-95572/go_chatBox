@@ -64,7 +64,7 @@
             data.forEach(function(i){
                 let newRow = tbody.insertRow();
                 let newCell = newRow.insertCell();
-                newCell.innerHTML = `<a href="/user/${i.id}" target="_blank" >${i.name}</a>`;
+                newCell.innerHTML = `<a href="/user/${i.id}" >${i.name}</a>`;
                 newCell = newRow.insertCell();
                 newCell.innerHTML = i.u_name;
 

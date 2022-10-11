@@ -16,6 +16,7 @@ type WebSocketConnection struct {
 type WsPayload struct {
 	Action   string              `json:"action"`
 	UserID   int                 `json:"user_id"`
+	UID      int                 `json:"u_id"`
 	Conn     WebSocketConnection `json:"-"`
 	Message  string              `json:"msg"`
 	InsertID int
@@ -73,7 +74,7 @@ func (app *application) ListenForWs(conn *WebSocketConnection) { // receive msg
 
 		} else if payload.Action == "POST" {
 			payload.Conn = *conn
-			id, _ := app.DB.PostMsg(payload.UserID, payload.Message)
+			id, _ := app.DB.PostMsg(payload.UserID, payload.UID, payload.Message)
 			payload.InsertID = id
 			wsChan <- payload
 		} else if payload.Action == "GET" {
@@ -89,7 +90,8 @@ func (app *application) ListenToWsChannel() {
 		e := <-wsChan
 		response.UserID = e.UserID
 		if e.Action == "GET" {
-			response.Chat, _ = app.DB.GetAllMsg(e.UserID)
+			fmt.Println("GET ", e.UserID, e.UID)
+			response.Chat, _ = app.DB.GetAllMsg(e.UserID, e.UID)
 			response.Action = "GET"
 		} else if e.Action == "POST" {
 			response.Chat, _ = app.DB.GetMsg(e.InsertID)

@@ -24,8 +24,10 @@ func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
 func (app *application) GetAllMsg(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	userID, _ := strconv.Atoi(id)
+	uid := chi.URLParam(r, "uid")
+	UID, _ := strconv.Atoi(uid)
 
-	chats, err := app.DB.GetAllMsg(userID)
+	chats, err := app.DB.GetAllMsg(userID, UID)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
@@ -36,6 +38,8 @@ func (app *application) GetAllMsg(w http.ResponseWriter, r *http.Request) {
 func (app *application) PostMsg(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	userID, _ := strconv.Atoi(id)
+	uid := chi.URLParam(r, "uid")
+	UID, _ := strconv.Atoi(uid)
 
 	var userInput struct {
 		Message string `json:"msg"`
@@ -47,7 +51,7 @@ func (app *application) PostMsg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = app.DB.PostMsg(userID, userInput.Message)
+	_, err = app.DB.PostMsg(userID, UID, userInput.Message)
 
 	if err != nil {
 		app.badRequest(w, r, err)
@@ -75,4 +79,18 @@ func (app *application) AddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_ = app.writeJSON(w, http.StatusOK, nil)
+}
+
+func (app *application) GetFriend(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("USER  id")
+	id := chi.URLParam(r, "id")
+	userID, _ := strconv.Atoi(id)
+	fmt.Print("USER  id", userID)
+	friend, err := app.DB.GetAllFriend(userID)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+	app.writeJSON(w, http.StatusOK, friend)
+
 }

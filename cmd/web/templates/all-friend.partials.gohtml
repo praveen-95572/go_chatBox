@@ -6,6 +6,7 @@
     
     
     {{define "content"}}
+    <button class="btn btn-primary"><a href="/" style="color:white;">Back</a></button>
     <div class="mt-4 p-5 bg-primary text-white rounded">
         <h1>ALL Friends</h1>
         
@@ -13,7 +14,7 @@
     <table class="table" id="table" style="height:80vh;">
         <thead>
           <tr>
-            <th scope="col">Name</th><th scope="col"></th> 
+            <th scope="col">Name</th><th scope="col">Username</th> 
           </tr>
         </thead>
         <tbody>
@@ -22,10 +23,44 @@
         </tbody>
       </table>
         
-       <form method="post" id="submit">
-        <div class="form-group">
-          <input type="text" class="form-control" id="message" name="message" aria-describedby="msgHelp" required placeholder="Type ur thought">
-        </div>
-        <a href="javascript:void(0)" class="btn btn-primary" id="btn" onclick="postMsg()" >SEND</a>
-      </form>
+       
+    {{end}}
+
+    {{define "script"}}(
+      <script>
+        tbody = document.getElementById("table").getElementsByTagName("tbody")[0];
+        var id;
+        document.addEventListener("DOMContentLoaded", function(){
+            id = window.location.pathname.split("/").pop();
+            id =  parseInt(id, 10);
+
+            const requestOptions = {
+                method:"GET",
+                headers : {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            }
+
+            fetch("{{.API}}/api/all-friend/"+id, requestOptions)
+            .then(response => response.json())
+            .then(function(data){
+                if(data){
+                    data.forEach(function(i){
+                        if (i.id != id){
+                            console.log("I Is "+i)
+                            let newRow = tbody.insertRow();
+                            let newCell = newRow.insertCell();
+                            newCell.innerHTML = `<a href="/chat/${id}/${i.id}"  >${i.name}</a>`;
+                            newCell = newRow.insertCell();
+                            newCell.innerHTML = `<b>${i.u_name}</b>`;
+                        }
+                        })
+                    }
+            });
+
+        });
+
+      </script>
+
     {{end}}
